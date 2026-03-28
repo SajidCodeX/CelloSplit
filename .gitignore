@@ -1,0 +1,35 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+/.kotlin
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# ─── App Build Outputs ───────────────────────────────────────────────────────
+app/build/
+app/release/
+*.apk
+*.aab
+*.ap_
+
+# ─── SECURITY — NEVER commit these ──────────────────────────────────────────
+*.jks
+*.keystore
+google-services.json
+firebase-service-account.json
+keystore.properties
+*.p12
+*.pfx
+
+# ─── OS files ────────────────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+
+# ─── Logs / profiling ────────────────────────────────────────────────────────
+*.log
+*.hprof
