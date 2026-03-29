@@ -1,27 +1,46 @@
 package com.cellosplit.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cellosplit.app.ui.screens.account.AccountScreen
+import com.cellosplit.app.ui.screens.account.ProfileSetupScreen
 import com.cellosplit.app.ui.screens.group.GroupDetailScreen
 import com.cellosplit.app.ui.screens.home.HomeScreen
 import com.cellosplit.app.ui.screens.splash.SplashScreen
 
 enum class Screen {
-    Splash, Home, GroupDetail, Account
+    Splash, ProfileSetup, Home, GroupDetail, Account
 }
 
 @Composable
 fun AppNavigation() {
+    val mainViewModel: MainViewModel = hiltViewModel()
+    val hasSetupProfile by mainViewModel.hasSetupProfile.collectAsState()
+
     var currentScreen by remember { mutableStateOf(Screen.Splash) }
     var selectedPath by remember { mutableStateOf<String?>(null) } // For group detail
 
     when (currentScreen) {
         Screen.Splash -> {
-            SplashScreen(onSplashComplete = { currentScreen = Screen.Home })
+            SplashScreen(
+                onSplashComplete = {
+                    currentScreen = if (hasSetupProfile == true) {
+                        Screen.Home
+                    } else {
+                        Screen.ProfileSetup
+                    }
+                }
+            )
+        }
+        Screen.ProfileSetup -> {
+            ProfileSetupScreen(
+                onComplete = { currentScreen = Screen.Home }
+            )
         }
         Screen.Home -> {
             HomeScreen(
