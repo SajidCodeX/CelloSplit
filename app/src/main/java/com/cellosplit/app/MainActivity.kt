@@ -8,8 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.cellosplit.app.ui.navigation.AppNavigation
 import com.cellosplit.app.ui.theme.CelloSplitTheme
-import com.cellosplit.app.ui.CelloSplitRoot
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             CelloSplitTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    CelloSplitRoot()
+                    AppNavigation()
                 }
             }
         }
