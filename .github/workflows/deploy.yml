@@ -36,5 +36,5 @@ jobs:
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          groups: testers
+          testers: ${{ secrets.TESTER_EMAIL }}
           file: app/build/outputs/apk/release/app-release.apk
