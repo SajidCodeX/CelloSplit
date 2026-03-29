@@ -1,46 +1,25 @@
-# CelloSplit ProGuard Rules
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.kts.
 
-# ─── Keep Room entities (R8 must not rename @Entity classes) ─────────────────
--keep class com.cellosplit.app.data.local.entity.** { *; }
+# Keep Room generated classes and properties
+-keep class androidx.room.** { *; }
 
-# ─── Keep Room DAOs (accessed via reflection by Room) ────────────────────────
--keep interface com.cellosplit.app.data.local.dao.** { *; }
-
-# ─── Keep SQLCipher (native library wrapper) ─────────────────────────────────
+# Keep SQLCipher crypto dependencies
 -keep class net.sqlcipher.** { *; }
 -keep class net.sqlcipher.database.** { *; }
 
-# ─── Hilt (do not obfuscate generated Hilt classes) ─────────────────────────
--keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
+# Keep Domain Models used by Room
+-keepclassmembers class com.cellosplit.app.domain.model.** { *; }
+-keep class com.cellosplit.app.domain.model.** { *; }
+
+# Keep Compose and Hilt essentials
+-keepclassmembers class * {
+    @androidx.compose.runtime.Composable <methods>;
+}
 -keep class dagger.hilt.** { *; }
--keep class javax.inject.** { *; }
 
-# ─── Kotlinx Serialization ───────────────────────────────────────────────────
--keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt
--keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
--keepclasseswithmembers class * { @kotlinx.serialization.Serializable *; }
-
-# ─── Kotlin ──────────────────────────────────────────────────────────────────
--keep class kotlin.Metadata { *; }
-
-# ─── Coroutines ──────────────────────────────────────────────────────────────
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
-
-# ─── Timber (only DebugTree used in debug — stripped in release) ──────────────
--assumenosideeffects class timber.log.Timber {
-    public static *** d(...);
-    public static *** v(...);
-    public static *** i(...);
-    public static *** w(...);
-}
-
-# ─── WorkManager ─────────────────────────────────────────────────────────────
--keep class * extends androidx.work.Worker
--keep class * extends androidx.work.ListenableWorker {
-    public <init>(android.content.Context, androidx.work.WorkerParameters);
-}
-
-# ─── UPI Intent (android.content.Intent must not be obfuscated) ─────────────
--keep class android.content.Intent { *; }
+# Obfuscate everything else heavily
+-repackageclasses ''
+-allowaccessmodification
+-optimizations !code/simplification/arithmetic

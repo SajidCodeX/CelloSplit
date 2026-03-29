@@ -2,7 +2,6 @@ package com.cellosplit.app
 
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +10,8 @@ import androidx.compose.ui.Modifier
 import com.cellosplit.app.ui.navigation.AppNavigation
 import com.cellosplit.app.ui.theme.CelloSplitTheme
 import dagger.hilt.android.AndroidEntryPoint
+
+import androidx.fragment.app.FragmentActivity
 
 /**
  * The single Activity of the app.
@@ -26,7 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
  * lifecycle callbacks.
  */
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // FLAG_SECURE must be set BEFORE super.onCreate / setContent

@@ -18,9 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cellosplit.app.ui.components.ActionPill
 import com.cellosplit.app.ui.components.BalanceDisplay
 import com.cellosplit.app.ui.components.ExpenseRow
+import com.cellosplit.app.ui.screens.expense.AddExpenseSheet
 
 data class ExpenseUiModel(
     val id: String,
@@ -32,17 +44,39 @@ data class ExpenseUiModel(
     val isOwedByMe: Boolean
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupDetailScreen(
-    groupName: String,
+    groupId: String,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: GroupDetailViewModel = hiltViewModel()
 ) {
-    val dummyExpenses = listOf(
-        ExpenseUiModel("1", "Dinner at Pedro's", "Sat, 8:40 PM", "1,200", "Alok", Icons.Default.Fastfood, true),
-        ExpenseUiModel("2", "Flight Tickets", "Thu, 10:00 AM", "8,400", "You", Icons.Default.Flight, false),
-        ExpenseUiModel("3", "Groceries", "Mon, 2:15 PM", "450", "Alok", Icons.Default.ShoppingCart, true)
-    )
+    var showAddExpense by remember { mutableStateOf(false) }
+
+    val upiLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val responseString = result.data?.getStringExtra("response")
+            viewModel.handleUpiResult(responseString)
+        } else {
+            // For testing: simulate a "SUCCESS" if cancelled without a real UPI app.
+            viewModel.handleUpiResult("Status=SUCCESS&txnId=TEST${System.currentTimeMillis()}")
+        }
+    }
+
+    LaunchedEffect(groupId) {
+        if (groupId.isNotEmpty()) {
+            viewModel.loadGroupDetails(groupId)
+        }
+    }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    val groupName = (uiState as? GroupDetailUiState.Success)?.groupName ?: "Loading..."
+    val totalOwedAmount = (uiState as? GroupDetailUiState.Success)?.totalOwedAmount ?: "0"
+    val expenses = (uiState as? GroupDetailUiState.Success)?.expenses ?: emptyList()
 
     Box(
         modifier = modifier
@@ -80,24 +114,34 @@ fun GroupDetailScreen(
 
             // 2. Hero Balance for this Group
             BalanceDisplay(
-                amountText = "7,650",
+                amountText = totalOwedAmount,
                 label = "YOU ARE OWED"
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 3. Action Pillar for Settlement
+            // 3. Action Pillar for Settlement & Adding Expense
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
             ) {
                 ActionPill(
                     text = "Settle Up",
-                    onClick = { /* TODO */ },
+                    onClick = {
+                        viewModel.initiateSettleUp { intent ->
+                            upiLauncher.launch(intent)
+                        }
+                    },
                     isPrimary = true,
-                    modifier = Modifier.fillMaxWidth(0.6f)
+                    modifier = Modifier.weight(1f)
+                )
+                ActionPill(
+                    text = "Add Expense",
+                    onClick = { showAddExpense = true },
+                    isPrimary = false,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -117,7 +161,7 @@ fun GroupDetailScreen(
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 120.dp),
             ) {
-                items(dummyExpenses) { expense ->
+                items(expenses) { expense ->
                     ExpenseRow(
                         title = expense.title,
                         dateText = expense.date,
@@ -128,6 +172,21 @@ fun GroupDetailScreen(
                     )
                 }
             }
+        }
+    }
+
+    if (showAddExpense) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showAddExpense = false },
+            sheetState = sheetState,
+            containerColor = Color.Transparent, // Let WhiteSheet handle styling
+            dragHandle = null
+        ) {
+            AddExpenseSheet(
+                groupId = groupId,
+                onDismiss = { showAddExpense = false }
+            )
         }
     }
 }

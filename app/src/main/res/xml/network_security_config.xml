@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Restricts all network traffic to HTTPS only.
-    Prevents accidental cleartext HTTP calls (e.g. to sync backend).
-    UPI uses OS-level intents so this does not affect it.
--->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>

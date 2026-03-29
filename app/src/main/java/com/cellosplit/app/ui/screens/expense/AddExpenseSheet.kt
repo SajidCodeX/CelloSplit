@@ -12,15 +12,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cellosplit.app.ui.components.WhiteSheet
+import com.cellosplit.app.domain.model.SplitMode
+import androidx.compose.foundation.clickable
 
 @Composable
 fun AddExpenseSheet(
+    groupId: String,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AddExpenseViewModel = hiltViewModel()
 ) {
     var amount by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    val isSaving by viewModel.isSaving.collectAsState()
 
     WhiteSheet(modifier = modifier) {
         Column(
@@ -139,16 +145,26 @@ fun AddExpenseSheet(
             Spacer(modifier = Modifier.height(48.dp))
 
             // Save Action
+            val opacity = if (isSaving || amount.isBlank() || description.isBlank()) 0.5f else 1f
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.extraLarge)
-                    .background(MaterialTheme.colorScheme.onPrimaryContainer)
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = opacity))
+                    .clickable(enabled = !isSaving && amount.isNotBlank() && description.isNotBlank()) {
+                        viewModel.saveExpense(
+                            groupId = groupId,
+                            description = description,
+                            amountText = amount,
+                            splitMode = SplitMode.EQUAL, // Setting default
+                            onSuccess = onDismiss
+                        )
+                    }
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Save Expense",
+                    text = if (isSaving) "Saving..." else "Save Expense",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary
                 )

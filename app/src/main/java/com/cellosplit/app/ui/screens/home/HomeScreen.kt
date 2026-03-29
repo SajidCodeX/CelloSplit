@@ -13,8 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.cellosplit.app.ui.components.ActionPill
 import com.cellosplit.app.ui.components.BalanceDisplay
 import com.cellosplit.app.ui.components.FloatingNavPill
@@ -33,12 +37,15 @@ data class GroupUiModel(
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToGroup: (String) -> Unit = {}
 ) {
-    val dummyGroups = listOf(
-        GroupUiModel("1", "Goa Trip", "Changed 2h ago", "GT", "2,450", true),
-        GroupUiModel("2", "Apartment 4B", "Rent & Groceries", "A4", "1,200", false)
-    )
+    val uiState by viewModel.uiState.collectAsState()
+
+    val groups = when (uiState) {
+        is HomeUiState.Success -> (uiState as HomeUiState.Success).groups
+        else -> emptyList()
+    }
 
     Box(
         modifier = modifier
@@ -74,7 +81,7 @@ fun HomeScreen(
                 )
                 ActionPill(
                     text = "New Group",
-                    onClick = { /* TODO */ },
+                    onClick = { viewModel.createTestGroup() },
                     isPrimary = false,
                     modifier = Modifier.weight(1f)
                 )
@@ -97,8 +104,9 @@ fun HomeScreen(
                 contentPadding = PaddingValues(bottom = 120.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(dummyGroups) { group ->
+                items(groups) { group ->
                     GroupRow(
+                        modifier = Modifier.clickable { onNavigateToGroup(group.id) },
                         title = group.name,
                         subtitle = group.subtitle,
                         initials = group.initials,

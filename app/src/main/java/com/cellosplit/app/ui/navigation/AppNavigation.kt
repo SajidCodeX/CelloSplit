@@ -33,7 +33,7 @@ fun AppNavigation() {
         }
         Screen.GroupDetail -> {
             GroupDetailScreen(
-                groupName = if (selectedPath == "1") "Goa Trip" else "Apartment 4B",
+                groupId = selectedPath ?: "",
                 onBackClick = { currentScreen = Screen.Home }
             )
         }
