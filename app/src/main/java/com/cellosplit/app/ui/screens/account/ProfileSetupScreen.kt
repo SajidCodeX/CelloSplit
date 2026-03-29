@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
@@ -33,7 +34,7 @@ fun ProfileSetupScreen(
         Text(
             text = "SOVEREIGN VAULT",
             style = MaterialTheme.typography.labelMedium.copy(
-                letterSpacing = 2.dp,
+                letterSpacing = 2.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
